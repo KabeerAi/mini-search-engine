@@ -3,15 +3,11 @@
 int main() {
     SearchEngine engine;
 
-    engine.addDocument("AI", "AI is the future");
-    engine.addDocument("Search", "Search engines use indexing");
+    engine.addDocument("Doc1", "AI is the future");
+    engine.addDocument("Doc2", "Search engines use AI");
+    engine.addDocument("Doc3", "AI is used in search engines");
 
-    engine.displayAllDocuments();
-
-    engine.updateDocument(1, "AI will change the world");
-    engine.removeDocument(2);
-
-    engine.displayAllDocuments();
+    engine.search("future");
 
     return 0;
 }

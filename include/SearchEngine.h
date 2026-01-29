@@ -3,10 +3,12 @@
 
 #include "Document.h"
 #include "DataStructures/LinkedList.h"
+#include "Index.h"
 
 class SearchEngine {
 private:
     LinkedList documents;
+    Index index;
     int nextDocID;
 
 public:
@@ -16,6 +18,8 @@ public:
     Document* findDocumentById(int id);
     void updateDocument(int id, const string& newContent);
     void displayAllDocuments();
+    void search(const std::string& keyword);
+
 };
 
 #endif

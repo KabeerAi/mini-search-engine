@@ -5,8 +5,9 @@ using namespace std;
 SearchEngine::SearchEngine() : nextDocID(1) {}
 
 void SearchEngine::addDocument(const string& title, const string& content) {
-    Document* doc = new Document(nextDocID++, title, content);
+    Document* doc = new Document(nextDocID, title, content);
     documents.addNode(doc);
+    index.addDocument(nextDocID, content);
     nextDocID++;
 
     cout << "Document added successfully!" << endl;
@@ -57,6 +58,37 @@ void SearchEngine::displayAllDocuments() {
         cout << "Access Count: " << doc->accessCount << "\n";
         cout << "-----------------------\n";
         current = current->next;
+    }
+}
+
+void SearchEngine::search(const string& keyword) {
+
+    // normalize keyword (lowercase)
+    string word = "";
+    for (char c : keyword) {
+        if (isalpha(c)) word += tolower(c);
+    }
+
+    LinkedList results = index.searchWord(word);
+
+    if (results.size == 0) {
+        cout << "No documents found.\n";
+        return;
+    }
+
+    Node* cur = results.head;
+    while (cur) {
+        int* docId = (int*) cur->data;
+        Document* doc = findDocumentById(*docId);
+
+        if (doc) {
+            doc->accessCount++; // for ranking later
+            cout << "ID: " << doc->id << "\n";
+            cout << "Title: " << doc->title << "\n";
+            cout << "Content: " << doc->content << "\n";
+            cout << "---------------------\n";
+        }
+        cur = cur->next;
     }
 }
 
