@@ -4,12 +4,14 @@
 #include "LinkedList.h"
 #include <string>
 
+using namespace std;
+
 class IndexNode {
 public:
-    std::string word;
+    string word;
     LinkedList documentIds;
 
-    IndexNode(std::string w);
+    IndexNode(string w);
 };
 
 #endif

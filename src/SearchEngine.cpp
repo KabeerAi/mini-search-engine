@@ -92,4 +92,102 @@ void SearchEngine::search(const string& keyword) {
     }
 }
 
+void SearchEngine::displayDocuments(LinkedList& ids) {
+    Node* cur = ids.head;
+
+    while (cur) {
+        int* id = (int*) cur->data;
+        Document* doc = findDocumentById(*id);
+
+        if (doc) {
+            doc->accessCount++;
+            cout << "ID: " << doc->id << "\n";
+            cout << "Title: " << doc->title << "\n";
+            cout << doc->content << "\n";
+            cout << "-----------------\n";
+        }
+        cur = cur->next;
+    }
+}
+
+
+LinkedList SearchEngine::tokenizeQuery(const std::string& query) {
+    LinkedList tokens;
+    string word = "";
+    for (char c : query) {
+        if (isalpha(c)) {
+            word += tolower(c);
+        }
+        else {
+            if (!word.empty()) {
+                tokens.addNode(new string(word));
+                word.clear();
+            }
+        }
+    }
+
+    if (!word.empty()) {
+        tokens.addNode(new string(word));
+    }
+
+    return tokens;
+}
+
+LinkedList SearchEngine::intersect(LinkedList& a, LinkedList& b) {
+    LinkedList result;
+
+    Node* curA = a.head;
+    while (curA) {
+        int* idA = (int*) curA->data;
+
+        Node* curB = b.head;
+        while (curB) {
+            int* idB = (int*) curB->data;
+
+            if (*idA == *idB) {
+                result.addNode(new int(*idA));
+                break;
+            }
+            curB = curB->next;
+        }
+        curA = curA->next;
+    }
+
+    return result;
+}
+
+
+void SearchEngine::searchMultiple(const string& query) {
+
+    LinkedList words = tokenizeQuery(query);
+
+    if (words.size == 0) return;
+
+    // Get first word result as base
+    Node* wcur = words.head;
+    string* firstWord = (string*) wcur->data;
+
+    LinkedList result = index.searchWord(*firstWord);
+
+    if (result.size == 0) {
+        cout << "No documents found.\n";
+        return;
+    }
+
+    wcur = wcur->next;
+
+    // Intersect with remaining words
+    while (wcur) {
+        string* word = (string*) wcur->data;
+        LinkedList nextList = index.searchWord(*word);
+
+        result = intersect(result, nextList);
+
+        if (result.size == 0) break;
+
+        wcur = wcur->next;
+    }
+
+    displayDocuments(result);
+}
 

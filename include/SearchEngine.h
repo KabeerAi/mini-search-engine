@@ -5,6 +5,8 @@
 #include "DataStructures/LinkedList.h"
 #include "Index.h"
 
+using namespace std;
+
 class SearchEngine {
 private:
     LinkedList documents;
@@ -18,8 +20,11 @@ public:
     Document* findDocumentById(int id);
     void updateDocument(int id, const string& newContent);
     void displayAllDocuments();
-    void search(const std::string& keyword);
-
+    void search(const string& keyword);
+    LinkedList tokenizeQuery(const string& query);
+    LinkedList intersect(LinkedList& a, LinkedList& b);
+    void searchMultiple(const string& query);
+    void displayDocuments(LinkedList& ids);
 };
 
 #endif

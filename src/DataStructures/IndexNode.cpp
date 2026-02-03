@@ -1,6 +1,6 @@
 #include "IndexNode.h"
 
-IndexNode::IndexNode(std::string w) : word(w) {}
+IndexNode::IndexNode(string w) : word(w) {}
 
 /*
 IndexNode("hello")

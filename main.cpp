@@ -7,7 +7,8 @@ int main() {
     engine.addDocument("Doc2", "Search engines use AI");
     engine.addDocument("Doc3", "AI is used in search engines");
 
-    engine.search("future");
+    engine.searchMultiple("search ai");
+
 
     return 0;
 }
