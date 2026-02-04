@@ -156,10 +156,80 @@ LinkedList SearchEngine::intersect(LinkedList& a, LinkedList& b) {
     return result;
 }
 
+void SearchEngine::displayRankedDocuments(LinkedList& ranked) {
+    Node* cur = ranked.head;
+
+    while (cur) {
+        RankNode* r = (RankNode*) cur->data;
+        Document* doc = findDocumentById(r->docId);
+
+        if (doc) {
+            std::cout << "Score: " << r->score << "\n";
+            std::cout << "ID: " << doc->id << "\n";
+            std::cout << "Title: " << doc->title << "\n";
+            std::cout << doc->content << "\n";
+            std::cout << "-----------------\n";
+        }
+        cur = cur->next;
+    }
+}
+
+bool SearchEngine::alreadyRanked(LinkedList& list, int docId) {
+    Node* cur = list.head;
+    while (cur) {
+        RankNode* r = (RankNode*) cur->data;
+        if (r->docId == docId) {
+            return true;
+        }
+        cur = cur->next;
+    }
+    return false;
+}
+
+void SearchEngine::updateSearchStats(LinkedList& words) {
+    Node* wcur = words.head;
+
+    while (wcur) {
+        string* w = (string*) wcur->data;
+
+        Node* scur = searchStats.head;
+        bool found = false;
+
+        while (scur) {
+            SearchStat* stat = (SearchStat*) scur->data;
+            if (stat->word == *w) {
+                stat->count++;
+                found = true;
+                break;
+            }
+            scur = scur->next;
+        }
+
+        if (!found) {
+            searchStats.addNode(new SearchStat(*w));
+        }
+
+        wcur = wcur->next;
+    }
+}
+
+void SearchEngine::displaySearchStats() {
+    Node* cur = searchStats.head;
+
+    std::cout << "\n--- Search Analytics ---\n";
+    while (cur) {
+        SearchStat* stat = (SearchStat*) cur->data;
+        std::cout << stat->word << " -> " << stat->count << "\n";
+        cur = cur->next;
+    }
+}
+
+
 
 void SearchEngine::searchMultiple(const string& query) {
 
     LinkedList words = tokenizeQuery(query);
+    updateSearchStats(words);
 
     if (words.size == 0) return;
 
@@ -188,6 +258,85 @@ void SearchEngine::searchMultiple(const string& query) {
         wcur = wcur->next;
     }
 
-    displayDocuments(result);
+    LinkedList rankedResults;
+
+    Node* cur = result.head;
+    while (cur) {
+        int* id = (int*) cur->data;
+        Document* doc = findDocumentById(*id);
+
+        if (doc) {
+            int score = countWordFrequency(doc->content, words);
+            if (!alreadyRanked(rankedResults, *id)) {
+                rankedResults.addNode(new RankNode(*id, score));
+            }
+        }
+        cur = cur->next;
+    }
+
+    sortByScore(rankedResults);
+    displayRankedDocuments(rankedResults);
+
+}
+
+
+int SearchEngine::countWordFrequency(const string& content, LinkedList& queryWords) {
+    int score = 0;
+    string word = "";
+
+    for (char c : content) {
+        if (isalpha(c)) {
+            word += tolower(c);
+        } else {
+            if (!word.empty()) {
+                Node* qcur = queryWords.head;
+                while (qcur) {
+                    string* q = (string*) qcur->data;
+                    if (word == *q) {
+                        score++;
+                    }
+                    qcur = qcur->next;
+                }
+                word.clear();
+            }
+        }
+    }
+
+    // last word
+    if (!word.empty()) {
+        Node* qcur = queryWords.head;
+        while (qcur) {
+            string* q = (string*) qcur->data;
+            if (word == *q) {
+                score++;
+            }
+            qcur = qcur->next;
+        }
+    }
+
+    return score;
+}
+
+void SearchEngine::sortByScore(LinkedList& list) {
+    if (list.size < 2) return;
+
+    bool swapped;
+    do {
+        swapped = false;
+        Node* cur = list.head;
+
+        while (cur && cur->next) {
+            RankNode* a = (RankNode*) cur->data;
+            RankNode* b = (RankNode*) cur->next->data;
+
+            if (a->score < b->score) {
+                void* temp = cur->data;
+                cur->data = cur->next->data;
+                cur->next->data = temp;
+                swapped = true;
+            }
+            cur = cur->next;
+        }
+    } while (swapped);
 }
 

@@ -4,7 +4,13 @@
 Node::Node(void* d, Node* n) : data(d), next(n) {}
 Node::Node(void* d) : data(d), next(nullptr) {}
 
+LinkedList::LinkedList() : head(nullptr), tail(nullptr), size(0) {}
+
 LinkedList::~LinkedList() {
+    clear();
+}
+
+void LinkedList::clear() {
     Node* current = head;
     while (current != nullptr) {
         Node* next = current->next;
@@ -14,6 +20,27 @@ LinkedList::~LinkedList() {
     head = nullptr;
     tail = nullptr;
     size = 0;
+}
+
+LinkedList::LinkedList(LinkedList&& other) noexcept 
+    : head(other.head), tail(other.tail), size(other.size) {
+    other.head = nullptr;
+    other.tail = nullptr;
+    other.size = 0;
+}
+
+LinkedList& LinkedList::operator=(LinkedList&& other) noexcept {
+    if (this != &other) {
+        clear();
+        head = other.head;
+        tail = other.tail;
+        size = other.size;
+        
+        other.head = nullptr;
+        other.tail = nullptr;
+        other.size = 0;
+    }
+    return *this;
 }
 
 void LinkedList::addNode(void* data) {

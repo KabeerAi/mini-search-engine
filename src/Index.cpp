@@ -9,7 +9,15 @@ LinkedList Index::searchWord(const string& word) {
     while (current) {
         IndexNode* idx = (IndexNode*) current->data;
         if (idx->word == word) {
-            return idx->documentIds;  // FOUND
+            // Return a deep copy of the list to avoid memory issues
+            LinkedList copy;
+            Node* idNode = idx->documentIds.head;
+            while(idNode) {
+                int* id = (int*) idNode->data;
+                copy.addNode(new int(*id));
+                idNode = idNode->next;
+            }
+            return copy;
         }
         current = current->next;
     }
